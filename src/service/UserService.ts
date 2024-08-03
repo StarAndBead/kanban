@@ -37,6 +37,21 @@ export class UserService {
         return { message: 'User registered successfully' };
     }
 
+
+
+    async changePassword(username: string, oldPassword: string, newPassword: string): Promise<boolean> {
+        const users = await this.readUsers();
+        const user = users.find(u => u.username == username);
+        console.log(users);
+        console.log(username);
+        if (user.password != oldPassword) {
+            throw new Error('Old password is incorrect');
+        }
+        user.password = newPassword;
+        await this.writeUsers(users);
+        return true;
+    }
+
     private async readUsers(): Promise<User[]> {
         const data = await fs.readFile(USERS_FILE, 'utf-8');
         return JSON.parse(data);

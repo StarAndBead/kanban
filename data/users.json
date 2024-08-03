@@ -3,7 +3,37 @@
     "id": 1722440225078,
     "username": "111",
     "password": "11111111",
-    "projects": []
+    "projects": [
+      {
+        "id": 1722694343002,
+        "title": "default project",
+        "username": "111",
+        "participants": [
+          "222"
+        ],
+        "participantsId": [
+          1722533964391
+        ],
+        "To do": [],
+        "In progress": [
+          {
+            "id": 1722694470937,
+            "name": "1",
+            "details": "111111",
+            "status": "In progress",
+            "attachment": [],
+            "deadline": "2024-07-29",
+            "assignees": [
+              "111(creator of the project)"
+            ],
+            "projectId": "1722694343002",
+            "comments": []
+          }
+        ],
+        "Completed": [],
+        "favorite": false
+      }
+    ]
   },
   {
     "id": 1722533964391,
@@ -11,13 +41,80 @@
     "password": "22222222",
     "projects": [
       {
-        "id": 1722670164670,
+        "id": 1722694343002,
         "title": "default project",
-        "username": "222",
+        "username": "111",
+        "participants": [
+          "222"
+        ],
+        "participantsId": [
+          1722533964391
+        ],
+        "To do": [],
+        "In progress": [
+          {
+            "id": 1722694470937,
+            "name": "1",
+            "details": "111111",
+            "status": "In progress",
+            "attachment": [],
+            "deadline": "2024-07-29",
+            "assignees": [
+              "111(creator of the project)"
+            ],
+            "projectId": "1722694343002",
+            "comments": []
+          }
+        ],
+        "Completed": [],
+        "favorite": false
+      }
+    ]
+  },
+  {
+    "id": 1722694707962,
+    "username": "333",
+    "password": "33333333",
+    "projects": [
+      {
+        "id": 1722694806029,
+        "title": "default project",
+        "username": "333",
         "participants": [],
         "participantsId": [],
         "To do": [],
         "In progress": [],
+        "Completed": []
+      }
+    ]
+  },
+  {
+    "id": 1722694821842,
+    "username": "444",
+    "password": "44444444",
+    "projects": [
+      {
+        "id": 1722694823994,
+        "title": "default project",
+        "username": "444",
+        "participants": [],
+        "participantsId": [],
+        "To do": [],
+        "In progress": [
+          {
+            "id": 1722698649305,
+            "name": "1",
+            "details": "111111",
+            "status": "In progress",
+            "attachment": [],
+            "deadline": "2024-08-12",
+            "assignees": [
+              "444(creator of the project)"
+            ],
+            "projectId": "1722694823994",
+            "comments": []
+          }
+        ],
         "Completed": []
       }
     ]

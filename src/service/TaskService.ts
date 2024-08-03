@@ -23,6 +23,7 @@ export class TaskService {
         }
         const task = new Task();
         Object.assign(task, taskData);
+        task.id = Date.now();
         task.projectId = projectId;
         task.comments = [];
         project[status].push(task);
@@ -108,9 +109,6 @@ export class TaskService {
                             }
                         }
                     });
-
-
-
                     await this.writeUsers(users);
                     return newTask;
                 }
@@ -170,7 +168,7 @@ export class TaskService {
         if (!task) {
             throw new Error('Task not found');
         }
-        task.comments.push(comment);
+        task.comments.push(username + ":" + comment);
 
         const allMembers = [...project.participants, user.username];
         allMembers.forEach(memberUsername => {
@@ -188,7 +186,58 @@ export class TaskService {
         await this.writeUsers(users);
         return task;
     }
+    async uploadFiles(username: string, projectId: number, taskId: number, files: any) {
+        const uploadDir = join(__dirname, '../../uploads', taskId.toString());
+        const users = await this.readUsers();
+        const user = users.find(u => u.username == username);
+        if (!user) {
+            throw new Error('User not found');
+        }
 
+        const project = user.projects.find(p => p.id == projectId);
+        if (!project) {
+            throw new Error('Project not found');
+        }
+
+        const savedFiles = [];
+        let originalTask = null;
+        for (const file of files) {
+            const targetPath = join(uploadDir, `${file.filename}`);
+            await fs.writeFile(targetPath, file.data);
+            savedFiles.push({
+                filename: file.filename,
+                path: targetPath
+            });
+
+            const statuses = ['To do', 'In progress', 'Completed'];
+            for (const status of statuses) {
+                originalTask = [];
+                originalTask = project[status].find(t => t.id == taskId);
+                if (originalTask) {
+                    // 保留comments和projectId
+                    originalTask.attachment.push({
+                        filename: file.filename,
+                        path: targetPath
+                    });
+
+                    const allMembers = [...project.participants, user.username];
+                    allMembers.forEach(memberUsername => {
+                        if (memberUsername != username) {
+                            const memberUser = users.find(u => u.username == memberUsername);
+                            if (memberUser) {
+                                const projectIndex = memberUser.projects.findIndex(p => p.id == projectId);
+                                let oldFav = memberUser.projects[projectIndex].favorite;
+                                memberUser.projects[projectIndex] = project;
+                                memberUser.projects[projectIndex].favorite = oldFav;
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        await this.writeUsers(users);
+        return originalTask.attachment;
+    }
     private async readUsers(): Promise<User[]> {
         const data = await fs.readFile(USERS_FILE, 'utf-8');
         return JSON.parse(data);

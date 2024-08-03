@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Inject, Provide } from '@midwayjs/decorator';
+import { Controller, Post, Put, Param, Body, Inject, Provide } from '@midwayjs/decorator';
 import { UserService } from '../service/UserService';
 
 @Provide()
@@ -17,5 +17,16 @@ export class UserController {
     async register(@Body() body) {
         const { username, password } = body;
         return this.userService.register(username, password);
+    }
+
+    @Put('/users/:username/change-password')
+    async changePassword(@Param() username: any, @Body() body) {
+        const { username: user_name } = username;
+        const { oldPassword, newPassword } = body;
+        const result = await this.userService.changePassword(user_name, oldPassword, newPassword);
+        if (!result) {
+            throw new Error('Failed to change password');
+        }
+        return { message: 'Password changed successfully' };
     }
 }
