@@ -1,0 +1,48 @@
+.container {
+
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-200px, -150px);
+    /* 调整元素的中心位置到视口的中心 */
+    background-color: transparent;
+    /* 背景颜色透明 */
+    padding: 24px;
+    /* 内边距 */
+    border-radius: 8px;
+    /* 边角的圆滑度 */
+    border: 4px solid rgba(227, 180, 244, 0.425);
+    /* 边框颜色和宽度 */
+    z-index: 1;
+    /* 确保容器内容在背景层之上 */
+}
+
+.title {
+    color: rgba(216, 141, 210, 0.6);
+    font-weight: bold;
+}
+
+
+.main {
+    position: relative;
+
+    min-height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.main::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+    /* 调整此值来改变背景图片的透明度 */
+}

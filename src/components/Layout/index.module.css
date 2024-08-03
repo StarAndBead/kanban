@@ -1,0 +1,36 @@
+.container {
+  height: 100%;
+}
+
+.header {
+  font-size: 20px;
+  font-weight: bold;
+  border-bottom: 1px solid #ebebeb;
+  background-color: #fff;
+  color: #4590f0;
+}
+
+.logo {
+  margin-right: 8px;
+  margin-top: -6px;
+}
+
+.sider {
+  background: #fff !important;
+  position: fixed;
+  left: 0;
+}
+
+.menu {
+  height: 100%;
+}
+
+.content {
+  padding: 32px;
+}
+
+.user {
+  float: right;
+  font-weight: normal;
+  font-size: 16px;
+}
