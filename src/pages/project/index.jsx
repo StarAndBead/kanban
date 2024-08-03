@@ -247,7 +247,7 @@ const Project = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             fetchEvents();
-        }, 1000); // Call fetchEvents every second
+        }, 5000); // Call fetchEvents every second
 
         // Cleanup interval on component unmount
         return () => clearInterval(interval);

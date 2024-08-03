@@ -106,8 +106,6 @@ export const Task = ({ name, details, id, comments, handleUpdate, handleRemove, 
     );
 };
 
-
-
 export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetchEventsAndToDefaultProject, members }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -116,75 +114,69 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
     const [currentTask, setCurrentTask] = useState(null);
     const [form] = Form.useForm();
     const [commentForm] = Form.useForm();
-    const [fileList, setFileList] = useState([]);
 
     const handleAdd = () => {
         setIsEditing(false);
-        form.resetFields(); // Reset form fields
-        setFileList([]); // Reset file list
+        form.resetFields();
         setIsModalVisible(true);
     };
 
     const handleAddOk = async () => {
         try {
             const values = await form.validateFields();
-            const { name, details, status, deadline, assignees } = values;
+            const { name, details, status, attachment, deadline, assignees } = values;
             const isTaskNameDuplicate = events.find(event => event.id === currentEvent.id)[tag].some(task => task.name.toLowerCase() === name.toLowerCase());
             if (isTaskNameDuplicate) {
-                message.error('任务已存在，请重新命名');
+                message.error('Task already exists, please rename.');
                 return;
             }
-
             const newTask = {
-                id: Date.now(),
                 name,
                 details,
                 status,
-                attachment: fileList.map(file => file.response?.url || file.name),
+                attachment: [],
                 deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
                 assignees,
             };
-
             const username = localStorage.getItem('username');
             await axios.post(`/api/${username}/projects/${currentEvent.id}/tasks/${status}`, newTask, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
-
             form.resetFields();
             setIsModalVisible(false);
-            fetchEvents(); // Fetch updated events from backend
+            fetchEvents();
         } catch (error) {
             console.error('Failed to add task!', error);
-            message.error('任务添加失败', error);
+            message.error('Failed to add task!', error);
         }
     };
 
     const handleEditOk = async (id) => {
         try {
             const values = await form.validateFields();
-            const { name, details, status, deadline, assignees } = values;
-
-            const username = localStorage.getItem('username');
-            await axios.put(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, {
+            const { name, details, status, attachment, deadline, assignees } = values;
+            const updatedTask = {
                 name,
                 details,
                 status,
-                attachment: fileList.map(file => file.response?.url || file.name),
+                attachment: attachment,
                 deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
                 assignees
-            }, {
+            };
+            const username = localStorage.getItem('username');
+            await axios.put(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, updatedTask, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
 
             setIsModalVisible(false);
-            fetchEvents(); // Fetch updated events from backend
+            fetchEvents();
         } catch (error) {
             console.error('Failed to edit task!', error);
-            message.error('Task with the same name exists, please change the name first!');
+            message.error('Failed to edit task!', error);
         }
     };
 
@@ -197,7 +189,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
     const handleRemove = useCallback((id, e) => {
         e.stopPropagation();
 
-        Modal.confirm({
+        confirm({
             title: 'Are you sure you want to delete this task?',
             content: 'This action cannot be undone.',
             okText: 'Yes',
@@ -212,10 +204,10 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                         }
                     });
 
-                    fetchEvents(); // Fetch updated events from backend
+                    fetchEvents();
                 } catch (error) {
                     console.error('Failed to delete task!', error);
-                    message.error('任务删除失败');
+                    message.error('Failed to delete task!');
                 }
             },
             onCancel() {
@@ -231,9 +223,9 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
         form.setFieldsValue({
             ...task,
             id,
-            deadline: task.deadline ? dayjs(task.deadline) : null // 将 deadline 转换为 dayjs 对象 
+            deadline: task.deadline ? dayjs(task.deadline) : null
         });
-        setFileList(task.attachment.map(url => ({ url, name: url, status: 'done' })));
+        setCurrentTask(task);
     };
 
     const handleComment = (id) => {
@@ -261,11 +253,11 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                 }
             });
 
-            fetchEvents(); // Fetch updated events from backend
+            fetchEvents();
             setIsCommentVisible(false);
         } catch (error) {
             console.error('Failed to add comment!', error);
-            message.error('评论添加失败');
+            message.error('Failed to add comment!');
         }
     };
 
@@ -282,29 +274,31 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                     >
                         {events
                             .find((event) => event.id === currentEvent.id)
-                            ?.[tag]?.map((task, index) => (
-                                <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                        >
-                                            <Task
-                                                name={task.name}
-                                                details={task.details}
-                                                id={task.id}
-                                                comments={task.comments}
-                                                handleRemove={handleRemove}
-                                                handleUpdate={handleUpdate}
-                                                handleComment={handleComment}
-                                                handleDetail={handleDetail}
-                                                assignees={task.assignees}
-                                            />
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
+                            ?.[tag]?.map((task, index) => {
+                                return (
+                                    <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                            >
+                                                <Task
+                                                    name={task.name}
+                                                    details={task.details}
+                                                    id={task.id}
+                                                    comments={task.comments}
+                                                    handleRemove={handleRemove}
+                                                    handleUpdate={handleUpdate}
+                                                    handleComment={handleComment}
+                                                    handleDetail={handleDetail}
+                                                    assignees={task.assignees}
+                                                />
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                )
+                            })}
                         {provided.placeholder}
                     </div>
                 )}
@@ -338,7 +332,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                         label="Status"
                         rules={[{ required: true, message: 'Please select the status of the task!' }]}
                     >
-                        <Select placeholder="Select a status" allowClear>
+                        <Select placeholder="Select status" allowClear>
                             <Option value="To do">To Do</Option>
                             <Option value="In progress">In Progress</Option>
                             <Option value="Completed">Completed</Option>
@@ -347,37 +341,22 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                     <Form.Item
                         name="deadline"
                         label="Deadline"
-                        rules={[
-
-                            { required: true, message: 'Please select the deadline of the task!' }]}
+                        rules={[{ required: true, message: 'Please select the deadline of the task!' }]}
                     >
                         <DatePicker
                             onChange={(date) => form.setFieldsValue({ deadline: date ? dayjs(date) : null })}
                         />
                     </Form.Item>
-                    <Form.Item
+                    {isEditing && <Form.Item
                         name="attachment"
                         label="Attachment"
                         valuePropName="fileList"
                         getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
                     >
-                        <Upload
-                            name="file"
-                            action={`/api/${localStorage.getItem('username')}/projects/${currentEvent.id}/tasks/upload`}
-                            listType="text"
-                            headers={{ Authorization: `Bearer ${localStorage.getItem('token')}` }}
-                            onChange={info => {
-                                if (info.file.status === 'done') {
-                                    message.success(`${info.file.name} file uploaded successfully`);
-                                    setFileList(info.fileList);
-                                } else if (info.file.status === 'error') {
-                                    message.error(`${info.file.name} file upload failed.`);
-                                }
-                            }}
-                        >
+                        <Upload name="files" listType="text" allowClear>
                             <Button icon={<UploadOutlined />}>Click to upload</Button>
                         </Upload>
-                    </Form.Item>
+                    </Form.Item>}
                     <Form.Item
                         name="assignees"
                         label="Assignees"
@@ -431,330 +410,15 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                         <p><strong>Status:</strong> {currentTask.status}</p>
                         <p><strong>Assignees:</strong> {currentTask.assignees.join(', ')}</p>
                         <p><strong>Deadline:</strong> {currentTask.deadline}</p>
-                        <p><strong>Attachment:</strong></p>
-                        <ul>
-                            {currentTask.attachment && currentTask.attachment.map((file, index) => (
-                                <li key={index}><a href={file} download>{file}</a></li>
-                            ))}
-                        </ul>
+                        {currentTask.attachment && (
+                            <p><strong>Attachment:</strong> <a href={currentTask.attachment} download>Download Attachment</a></p>
+                        )}
                     </div>
                 )}
             </Modal>
-        </div>
+        </div >
     );
 };
-// export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetchEventsAndToDefaultProject, members }) => {
-//     const [isModalVisible, setIsModalVisible] = useState(false);
-//     const [isEditing, setIsEditing] = useState(false);
-//     const [isCommentVisible, setIsCommentVisible] = useState(false);
-//     const [isDetailVisible, setIsDetailVisible] = useState(false);
-//     const [currentTask, setCurrentTask] = useState(null);
-//     const [form] = Form.useForm();
-//     const [commentForm] = Form.useForm();
-
-//     const handleAdd = () => {
-//         setIsEditing(false);
-//         form.resetFields(); // Reset form fields
-//         setIsModalVisible(true);
-//     };
-
-//     const handleAddOk = async () => {
-//         try {
-//             const values = await form.validateFields();
-//             const { name, details, status, attachment, deadline, assignees } = values;
-//             const isTaskNameDuplicate = events.find(event => event.id === currentEvent.id)[tag].some(task => task.name.toLowerCase() === name.toLowerCase());
-//             if (isTaskNameDuplicate) {
-//                 message.error('任务已存在，请重新命名');
-//                 return;
-//             }
-
-//             const newTask = {
-//                 name,
-//                 details,
-//                 status,
-//                 attachment,
-//                 deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
-//                 assignees,
-//             };
-//             const username = localStorage.getItem('username');
-//             await axios.post(`/api/${username}/projects/${currentEvent.id}/tasks/${status}`, newTask, {
-//                 headers: {
-//                     Authorization: `Bearer ${localStorage.getItem('token')}`
-//                 }
-//             });
-//             form.resetFields();
-//             setIsModalVisible(false);
-//             fetchEvents(); // Fetch updated events from backend
-//         } catch (error) {
-//             console.error('Failed to add task!', error);
-//             message.error('任务添加失败', error);
-//         }
-//     };
-
-//     const handleEditOk = async (id) => {
-//         try {
-//             const values = await form.validateFields();
-//             const { name, details, status, attachment, deadline, assignees } = values;
-
-//             const username = localStorage.getItem('username');
-//             await axios.put(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, {
-//                 name,
-//                 details,
-//                 status,
-//                 attachment,
-//                 deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
-//                 assignees
-//             }, {
-//                 headers: {
-//                     Authorization: `Bearer ${localStorage.getItem('token')}`
-//                 }
-//             });
-
-//             setIsModalVisible(false);
-//             fetchEvents(); // Fetch updated events from backend
-//         } catch (error) {
-//             console.error('Failed to edit task!', error);
-//             message.error('Task with the same name exists,please change the name first!');
-//         }
-//     };
-
-//     const handleCancel = () => {
-//         setIsModalVisible(false);
-//         setIsCommentVisible(false);
-//         setIsDetailVisible(false);
-//     };
-
-//     const handleRemove = useCallback((id, e) => {
-//         e.stopPropagation();
-
-//         confirm({
-//             title: 'Are you sure you want to delete this task?',
-//             content: 'This action cannot be undone.',
-//             okText: 'Yes',
-//             okType: 'danger',
-//             cancelText: 'No',
-//             async onOk() {
-//                 try {
-//                     const username = localStorage.getItem('username');
-//                     await axios.delete(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, {
-//                         headers: {
-//                             Authorization: `Bearer ${localStorage.getItem('token')}`
-//                         }
-//                     });
-
-//                     fetchEvents(); // Fetch updated events from backend
-//                 } catch (error) {
-//                     console.error('Failed to delete task!', error);
-//                     message.error('任务删除失败');
-//                 }
-//             },
-//             onCancel() {
-//                 console.log('Cancel');
-//             },
-//         });
-//     }, [currentEvent, fetchEvents, tag]);
-
-//     const handleUpdate = (id) => {
-//         setIsEditing(true);
-//         setIsModalVisible(true);
-//         const task = events.find((event) => event.id === currentEvent.id)[tag].find((task) => task.id === id);
-//         form.setFieldsValue({
-//             ...task,
-//             id,
-//             deadline: task.deadline ? dayjs(task.deadline) : null // 将 deadline 转换为 dayjs 对象 
-//         });
-//     };
-
-//     const handleComment = (id) => {
-//         setIsCommentVisible(true);
-//         const task = events.find((event) => event.id === currentEvent.id)[tag].find((task) => task.id === id);
-//         setCurrentTask(task);
-//     };
-
-//     const handleDetail = (id) => {
-//         setIsDetailVisible(true);
-//         const task = events.find((event) => event.id === currentEvent.id)[tag].find((task) => task.id === id);
-//         setCurrentTask(task);
-//     };
-
-//     const handleCommentOk = async () => {
-//         try {
-//             const values = await commentForm.validateFields();
-//             commentForm.resetFields();
-//             const { comment } = values;
-
-//             const username = localStorage.getItem('username');
-//             await axios.post(`/api/${username}/projects/${currentEvent.id}/tasks/${currentTask.id}/comments`, { comment }, {
-//                 headers: {
-//                     Authorization: `Bearer ${localStorage.getItem('token')}`
-//                 }
-//             });
-
-//             fetchEvents(); // Fetch updated events from backend
-//             setIsCommentVisible(false);
-//         } catch (error) {
-//             console.error('Failed to add comment!', error);
-//             message.error('评论添加失败');
-//         }
-//     };
-
-//     return (
-//         <div style={styles.column}>
-//             <h2>{tag}</h2>
-//             <button style={styles.addTaskButton} onClick={handleAdd}>Add Task</button>
-//             <Droppable droppableId={tag}>
-//                 {(provided, snapshot) => (
-//                     <div
-//                         ref={provided.innerRef}
-//                         {...provided.droppableProps}
-//                         style={styles.taskContainer}
-//                     >
-//                         {events
-//                             .find((event) => event.id === currentEvent.id)
-//                             ?.[tag]?.map((task, index) => {
-//                                 //  console.log('Task:', task); // 调试输出
-//                                 return (
-//                                     <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-//                                         {(provided, snapshot) => (
-//                                             <div
-//                                                 ref={provided.innerRef}
-//                                                 {...provided.draggableProps}
-//                                                 {...provided.dragHandleProps}
-//                                             >
-//                                                 <Task
-//                                                     name={task.name}
-//                                                     details={task.details}
-//                                                     id={task.id}
-//                                                     comments={task.comments}
-//                                                     handleRemove={handleRemove}
-//                                                     handleUpdate={handleUpdate}
-//                                                     handleComment={handleComment}
-//                                                     handleDetail={handleDetail}
-//                                                     assignees={task.assignees}
-//                                                 />
-//                                             </div>
-//                                         )}
-//                                     </Draggable>
-//                                 )
-//                             })}
-//                         {provided.placeholder}
-//                     </div>
-//                 )}
-//             </Droppable>
-//             <Modal
-//                 title={isEditing ? "Edit Task" : "Add New Task"}
-//                 visible={isModalVisible}
-//                 onOk={isEditing ? () => handleEditOk(form.getFieldValue('id')) : handleAddOk}
-//                 onCancel={handleCancel}
-//             >
-//                 <Form form={form} layout="vertical" name="form_in_modal">
-//                     <Form.Item name="id" style={{ display: 'none' }}>
-//                         <Input />
-//                     </Form.Item>
-//                     <Form.Item
-//                         name="name"
-//                         label="Task Name"
-//                         rules={[{ required: true, message: 'Please input the name of the task!' }]}
-//                     >
-//                         <Input allowClear />
-//                     </Form.Item>
-//                     <Form.Item
-//                         name="details"
-//                         label="Task Details"
-//                         rules={[{ required: true, message: 'Please input the details of the task!' }]}
-//                     >
-//                         <Input.TextArea allowClear />
-//                     </Form.Item>
-//                     <Form.Item
-//                         name="status"
-//                         label="Status"
-//                         rules={[{ required: true, message: 'Please select the status of the task!' }]}
-//                     >
-//                         <Select placeholder="Select a status" allowClear>
-//                             <Option value="To do">To Do</Option>
-//                             <Option value="In progress">In Progress</Option>
-//                             <Option value="Completed">Completed</Option>
-//                         </Select>
-//                     </Form.Item>
-//                     <Form.Item
-//                         name="deadline"
-//                         label="Deadline"
-//                         rules={[{ required: true, message: 'Please select the deadline of the task!' }]}
-//                     >
-//                         <DatePicker
-//                             onChange={(date) => form.setFieldsValue({ deadline: date ? dayjs(date) : null })}
-//                         />
-//                     </Form.Item>
-//                     <Form.Item
-//                         name="attachment"
-//                         label="Attachment"
-//                         valuePropName="fileList"
-//                         getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
-//                     >
-//                         <Upload name="files" action="/upload.do" listType="text" allowClear>
-//                             <Button icon={<UploadOutlined />}>Click to upload</Button>
-//                         </Upload>
-//                     </Form.Item>
-//                     <Form.Item
-//                         name="assignees"
-//                         label="Assignees"
-//                         rules={[{ required: true, message: 'Please select the assignees of the task!' }]}
-//                     >
-//                         <Select mode="multiple" placeholder="Select assignees" allowClear>
-//                             {members.map(member => (
-//                                 <Option key={member} value={member}>
-//                                     {member}
-//                                 </Option>
-//                             ))}
-//                         </Select>
-//                     </Form.Item>
-//                 </Form>
-//             </Modal>
-//             <Modal
-//                 title="Comments"
-//                 visible={isCommentVisible}
-//                 onOk={handleCommentOk}
-//                 onCancel={handleCancel}
-//             >
-//                 <Form form={commentForm} layout="vertical" name="comment_form_in_modal">
-//                     <Form.Item
-//                         name="comment"
-//                         label="Comment"
-//                         rules={[{ required: true, message: 'Please input your comment!' }]}
-//                     >
-//                         <Input.TextArea allowClear />
-//                     </Form.Item>
-//                 </Form>
-//                 <div>
-//                     <h3>Existing Comments:</h3>
-//                     <ul>
-//                         {currentTask && currentTask.comments && currentTask.comments.map((comment, index) => (
-//                             <li key={index}>{comment}</li>
-//                         ))}
-//                     </ul>
-//                 </div>
-//             </Modal>
-//             <Modal
-//                 title="Task Details"
-//                 visible={isDetailVisible}
-//                 onOk={handleCancel}
-//                 onCancel={handleCancel}
-//             >
-//                 {currentTask && (
-//                     <div>
-//                         <p><strong>ID:</strong> {currentTask.id}</p>
-//                         <p><strong>Name:</strong> {currentTask.name}</p>
-//                         <p><strong>Details:</strong> {currentTask.details}</p>
-//                         <p><strong>Status:</strong> {currentTask.status}</p>
-//                         <p><strong>Assignees:</strong> {currentTask.assignees.join(', ')}</p>
-//                         <p><strong>Deadline:</strong> {currentTask.deadline}</p>
-//                         <p><strong>Attachment:</strong> {currentTask.attachment}</p>
-//                     </div>
-//                 )}
-//             </Modal>
-//         </div>
-//     );
-// };
 
 
 export const TaskBox = ({ events, setEvents, currentEvent, setCurrentEvent, fetchEvents, fetchEventsAndToDefaultProject }) => {
