@@ -59,28 +59,33 @@ const Fav_EventBar = ({ events, setEvents, currentEvent, setCurrentEvent, fetchE
         <div style={styles.eventBar}>
             <h1 style={{ marginBottom: 10 }}>My Favourite Projects</h1>
             <div style={styles.eventContainer}>
-                {events.map((item) => (
-                    <div
-                        key={item.id}
-                        style={{
-                            ...styles.event,
-                            ...(currentEvent && currentEvent.id === item.id ? styles.selectedEvent : {}),
-                            display: 'grid', // 设置为 grid 布局
-                            gridTemplateColumns: 'auto 1fr', // 设置列宽，第二列自动填充剩余空间
-                            alignItems: 'center', // 垂直居中对齐
-                        }}
-                        onClick={() => setCurrentEvent(item)}
-                    >
-                        <span style={styles.starIcon} onClick={(e) => { e.stopPropagation(); }}>
-                            {item.favorite ? <StarFilled /> : <StarOutlined />}
-                        </span>
-                        <span style={{ textAlign: 'center' }}>
-                            {item.title}
-                        </span>
+                {events.length === 0 ? (
+                    <div style={{ padding: '20px', fontSize: '1.2em', color: '#999' }}>
+                        当前没有收藏的项目
                     </div>
-                ))}
+                ) : (
+                    events.map((item) => (
+                        <div
+                            key={item.id}
+                            style={{
+                                ...styles.event,
+                                ...(currentEvent && currentEvent.id === item.id ? styles.selectedEvent : {}),
+                                display: 'grid',
+                                gridTemplateColumns: 'auto 1fr',
+                                alignItems: 'center',
+                            }}
+                            onClick={() => setCurrentEvent(item)}
+                        >
+                            <span style={styles.starIcon} onClick={(e) => { e.stopPropagation(); }}>
+                                {item.favorite ? <StarFilled /> : <StarOutlined />}
+                            </span>
+                            <span style={{ textAlign: 'center' }}>
+                                {item.title}
+                            </span>
+                        </div>
+                    ))
+                )}
             </div>
-
         </div>
     );
 };
