@@ -5,7 +5,7 @@ import axios from 'axios';
 import uuid from 'react-uuid';
 import { UploadOutlined, StarOutlined, StarFilled } from '@ant-design/icons';
 const { Option } = Select;
-import { TaskBox } from '../../components/task';
+import { TaskBox } from '../../components/Favtask';
 const styles = {
     app: {
         display: 'flex',
@@ -86,6 +86,7 @@ const Fav_EventBar = ({ events, setEvents, currentEvent, setCurrentEvent, fetchE
                     ))
                 )}
             </div>
+
         </div>
     );
 };
@@ -103,7 +104,7 @@ const Workbench = () => {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            console.log({ response });
+            // console.log({ response });
             if (response.data.length === 0) {
                 setEvents([]);
                 setCurrentEvent(null);

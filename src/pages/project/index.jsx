@@ -118,26 +118,32 @@ export const EventBar = ({ events, setEvents, currentEvent, setCurrentEvent, fet
                 Add Project
             </Button>
             <div style={styles.eventContainer}>
-                {events.map((item) => (
-                    <div
-                        key={item.id}
-                        style={{
-                            ...styles.event,
-                            ...(currentEvent && currentEvent.id === item.id ? styles.selectedEvent : {}),
-                            display: 'grid', // 设置为 grid 布局
-                            gridTemplateColumns: 'auto 1fr', // 设置列宽，第二列自动填充剩余空间
-                            alignItems: 'center', // 垂直居中对齐
-                        }}
-                        onClick={() => setCurrentEvent(item)}
-                    >
-                        <span style={styles.starIcon} onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}>
-                            {item.favorite ? <StarFilled /> : <StarOutlined />}
-                        </span>
-                        <span style={{ textAlign: 'center' }}>
-                            {item.title}
-                        </span>
+                {events.length === 0 ? (
+                    <div style={{ padding: '20px', fontSize: '1.2em', color: '#999' }}>
+                        当前没有创建项目
                     </div>
-                ))}
+                ) : (
+                    events.map((item) => (
+                        <div
+                            key={item.id}
+                            style={{
+                                ...styles.event,
+                                ...(currentEvent && currentEvent.id === item.id ? styles.selectedEvent : {}),
+                                display: 'grid',
+                                gridTemplateColumns: 'auto 1fr',
+                                alignItems: 'center',
+                            }}
+                            onClick={() => setCurrentEvent(item)}
+                        >
+                            <span style={styles.starIcon} onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}>
+                                {item.favorite ? <StarFilled /> : <StarOutlined />}
+                            </span>
+                            <span style={{ textAlign: 'center' }}>
+                                {item.title}
+                            </span>
+                        </div>
+                    ))
+                )}
             </div>
             <Modal
                 title="Add New Project"
@@ -175,20 +181,24 @@ const Project = () => {
             // console.log({ response });
             if (response.data.length === 0) {
                 // If no projects, create a default project
-                const defaultProject = {
-                    title: 'default project',
-                    ['To do']: [],
-                    ['In progress']: [],
-                    ['Completed']: [],
-                };
-                //   console.log({ defaultProject });
-                const defaultResponse = await axios.post(`/api/${username}/projects`, defaultProject, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                setEvents([defaultResponse.data]);
-                setCurrentEvent(defaultResponse.data);
+
+                // const defaultProject = {
+                //     title: 'default project',
+                //     ['To do']: [],
+                //     ['In progress']: [],
+                //     ['Completed']: [],
+                // };
+                // //   console.log({ defaultProject });
+                // const defaultResponse = await axios.post(`/api/${username}/projects`, defaultProject, {
+                //     headers: {
+                //         Authorization: `Bearer ${localStorage.getItem('token')}`
+                //     }
+                // });
+                // setEvents([defaultResponse.data]);
+                // setCurrentEvent(defaultResponse.data);
+
+                setEvents([]);
+                setCurrentEvent(null);
                 //  console.log({ events });
                 // console.log({ currentEvent });
 
@@ -213,20 +223,24 @@ const Project = () => {
             //  console.log({ response });
             if (response.data.length === 0) {
                 // If no projects, create a default project
-                const defaultProject = {
-                    title: 'default project',
-                    ['To do']: [],
-                    ['In progress']: [],
-                    ['Completed']: [],
-                };
-                //   console.log({ defaultProject });
-                const defaultResponse = await axios.post(`/api/${username}/projects`, defaultProject, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                setEvents([defaultResponse.data]);
-                setCurrentEvent(defaultResponse.data);
+
+                // const defaultProject = {
+                //     title: 'default project',
+                //     ['To do']: [],
+                //     ['In progress']: [],
+                //     ['Completed']: [],
+                // };
+                // //   console.log({ defaultProject });
+                // const defaultResponse = await axios.post(`/api/${username}/projects`, defaultProject, {
+                //     headers: {
+                //         Authorization: `Bearer ${localStorage.getItem('token')}`
+                //     }
+                // });
+                // setEvents([defaultResponse.data]);
+                // setCurrentEvent(defaultResponse.data);
+
+                setEvents([]);
+                setCurrentEvent(null);
                 //  console.log({ events });
                 //  console.log({ currentEvent });
 

@@ -68,7 +68,7 @@ export const TaskName = ({ children }) => (
     </div>
 );
 
-export const Task = ({ name, details, id, comments, handleUpdate, handleRemove, handleComment, handleDetail }) => {
+export const FavTask = ({ name, details, id, comments, handleUpdate, handleRemove, handleComment, handleDetail }) => {
     const [hover, setHover] = useState(false);
 
     const taskStyle = {
@@ -96,11 +96,6 @@ export const Task = ({ name, details, id, comments, handleUpdate, handleRemove, 
             <TaskName>{name}</TaskName>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '5px' }}>
                 <Button type="link" onClick={(e) => { e.stopPropagation(); handleDetail(id); }}>Show Details</Button>
-            </div>
-            <div style={{ display: 'flex', gap: '5px' }}>
-                <Button type="link" onClick={() => handleUpdate(id)}>Edit</Button>
-                <Button type="link" onClick={(e) => { e.stopPropagation(); handleComment(id); }}>Comments</Button>
-                <Button type="link" danger onClick={(e) => handleRemove(id, e)}>Delete</Button>
             </div>
         </div>
     );
@@ -284,7 +279,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
                                             >
-                                                <Task
+                                                <FavTask
                                                     name={task.name}
                                                     details={task.details}
                                                     id={task.id}
@@ -576,3 +571,10 @@ export const TaskBox = ({ events, setEvents, currentEvent, setCurrentEvent, fetc
         </div>
     );
 };
+
+
+
+
+
+
+
