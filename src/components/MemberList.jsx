@@ -13,7 +13,7 @@ const MemberListModal = ({ visible, onCancel, members }) => {
         >
             <ul>
                 {members.map((member) => (
-                    <li >{member}</li>
+                    <li key={member}>{member}</li>
                 ))}
             </ul>
         </Modal>
