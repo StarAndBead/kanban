@@ -1,5 +1,5 @@
 import { Controller, Post, Put, Param, Body, Inject, Provide } from '@midwayjs/decorator';
-import { UserService } from '../service/UserService';
+import { MyUserService as UserService } from '../service/UserService';
 
 @Provide()
 @Controller('/api')

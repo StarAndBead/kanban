@@ -5,7 +5,7 @@ import { User } from '../entity/User';
 
 import { Task } from '../entity/Task';
 
-const USERS_FILE = join(__dirname, '../../data/users.json');
+const USERS_FILE = join(__dirname, '../data/users.json');
 
 @Provide()
 export class TaskService {

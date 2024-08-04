@@ -4,7 +4,7 @@ import { join } from 'path';
 import { User } from '../entity/User';
 import { Project } from '../entity/Project';
 
-const USERS_FILE = join(__dirname, '../../data/users.json');
+const USERS_FILE = join(__dirname, '../data/users.json');
 
 @Provide()
 export class ProjectService {
@@ -56,21 +56,6 @@ export class ProjectService {
             throw new Error('User not found');
         }
         //  console.log({ projectId });
-        const project = user.projects.find(p => p.id == projectId);
-        if (project.username == username) {
-            const participantsUsernames = project.participants; // 获取项目参与者用户名列表
-            const participants = users.filter(u => participantsUsernames.includes(u.username)); // 查找所有参与者用户
-            //对participants中的每一个进行.projects.filter(p => p.id != projectId);
-            participants.forEach(participant => {
-                participant.projects = participant.projects.filter(p => p.id != projectId);
-            });
-        }
-        else {
-            const participantsUsernames = project.participants.filter(participant => participant != username);
-            // 更新项目的参与者用户名列表
-            project.participants = participantsUsernames;
-        }
-
         user.projects = user.projects.filter(p => p.id != projectId);
         //  console.log({ user });
         //  console.log("______________//////////");

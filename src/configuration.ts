@@ -5,6 +5,7 @@ import * as info from '@midwayjs/info';
 import * as jwt from '@midwayjs/jwt';
 import * as upload from '@midwayjs/upload';
 import * as crossDomain from '@midwayjs/cross-domain';
+
 import { join } from 'path';
 import { mkdirSync } from 'fs';
 import { ReportMiddleware } from './middleware/report.middleware';
@@ -15,11 +16,12 @@ import { ReportMiddleware } from './middleware/report.middleware';
     koa,
     validate,
     upload,
+    crossDomain,
     {
       component: info,
       enabledEnvironment: ['local'],
     },
-    crossDomain,
+
   ],
   importConfigs: [join(__dirname, './config')],
 

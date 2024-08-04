@@ -4,10 +4,10 @@ import { join } from 'path';
 import { User } from '../entity/User';
 import { JwtService } from '@midwayjs/jwt';
 
-const USERS_FILE = join(__dirname, '../../data/users.json');
+const USERS_FILE = join(__dirname, '../data/users.json');
 
 @Provide()
-export class UserService {
+export class MyUserService {
     @Inject()
     jwtService: JwtService;
 
