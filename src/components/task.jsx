@@ -154,18 +154,97 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
         }
     };
 
+    // const handleEditOk = async (id) => {
+    //     try {
+    //         const values = await form.validateFields();
+    //         const { name, details, status, attachment, deadline, assignees } = values;
+
+    //         console.log(attachment);
+    //         console.log(attachment.fileList);
+    //         const attachmentPaths = [];
+
+    //         // 遍历 attachment.fileList 并上传每一个文件
+    //         if (attachment && attachment.fileList && attachment.fileList.length > 0) {
+    //             const username = localStorage.getItem('username');
+    //             for (const file of attachment.fileList) {
+    //                 const formData = new FormData();
+    //                 formData.append('file', file.originFileObj);
+
+    //                 const uploadResponse = await axios.post(`/api/${username}/projects/${currentEvent.id}/tasks/${id}/upload`, formData, {
+    //                     headers: {
+    //                         'Content-Type': 'multipart/form-data',
+    //                         Authorization: `Bearer ${localStorage.getItem('token')}`
+    //                     }
+    //                 });
+    //                 attachmentPaths.push(uploadResponse.data.url);
+    //             }
+    //         }
+
+    //         const updatedTask = {
+    //             name,
+    //             details,
+    //             status,
+    //             attachment: attachmentPaths, // 使用上传后的文件路径数组
+    //             deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
+    //             assignees
+    //         };
+
+    //         const username = localStorage.getItem('username');
+    //         await axios.put(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, updatedTask, {
+    //             headers: {
+    //                 Authorization: `Bearer ${localStorage.getItem('token')}`
+    //             }
+    //         });
+
+    //         setIsModalVisible(false);
+    //         fetchEvents();
+    //     } catch (error) {
+    //         console.error('Failed to edit task!', error);
+    //         message.error('Failed to edit task!');
+    //     }
+    // };
+    const normFile = (e) => {
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return e && e.fileList;
+    };
     const handleEditOk = async (id) => {
         try {
             const values = await form.validateFields();
             const { name, details, status, attachment, deadline, assignees } = values;
+
+            console.log(attachment);
+            const attachmentPaths = [];
+
+            // 遍历 attachment.fileList 并上传每一个文件
+            if (attachment && attachment.length > 0) {
+                const username = localStorage.getItem('username');
+                for (const file of attachment) {
+                    const formData = new FormData();
+                    formData.append('file', file.originFileObj);
+
+                    const uploadResponse = await axios.post(`/api/${username}/projects/${currentEvent.id}/tasks/${id}/upload`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    attachmentPaths.push(uploadResponse.data.url);
+                }
+            }
+
             const updatedTask = {
                 name,
                 details,
                 status,
-                attachment: attachment,
+                attachment: attachmentPaths, // 使用上传后的文件路径数组
                 deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
                 assignees
             };
+            currentTask.attachment.forEach((file) => {
+                console.log(file);
+            });
             const username = localStorage.getItem('username');
             await axios.put(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, updatedTask, {
                 headers: {
@@ -177,10 +256,9 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
             fetchEvents();
         } catch (error) {
             console.error('Failed to edit task!', error);
-            message.error('Failed to edit task!', error);
+            message.error('Failed to edit task!');
         }
     };
-
     const handleCancel = () => {
         setIsModalVisible(false);
         setIsCommentVisible(false);
@@ -223,6 +301,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
         const task = events.find((event) => event.id === currentEvent.id)[tag].find((task) => task.id === id);
         form.setFieldsValue({
             ...task,
+            attachment: [],
             id,
             deadline: task.deadline ? dayjs(task.deadline) : null
         });
@@ -348,16 +427,20 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                             onChange={(date) => form.setFieldsValue({ deadline: date ? dayjs(date) : null })}
                         />
                     </Form.Item>
-                    {isEditing && <Form.Item
-                        name="attachment"
-                        label="Attachment"
-                        valuePropName="fileList"
-                        getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
-                    >
-                        <Upload name="files" listType="text" allowClear>
-                            <Button icon={<UploadOutlined />}>Click to upload</Button>
-                        </Upload>
-                    </Form.Item>}
+                    {isEditing && (
+                        <Form.Item name="attachment" label="Attachment" valuePropName="fileList" getValueFromEvent={normFile}>
+                            <Upload name="file" listType="text" beforeUpload={() => false} multiple>
+                                <Button icon={<UploadOutlined />}>Click to upload</Button>
+                            </Upload>
+                        </Form.Item>
+                    )}
+                    {/* {isEditing && (
+                        <Form.Item name="attachment" label="Attachment">
+                            <Upload name="file" listType="text" beforeUpload={() => false} allowClear>
+                                <Button icon={<UploadOutlined />}>Click to upload</Button>
+                            </Upload>
+                        </Form.Item>
+                    )} */}
                     <Form.Item
                         name="assignees"
                         label="Assignees"
@@ -411,8 +494,16 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                         <p><strong>Status:</strong> {currentTask.status}</p>
                         <p><strong>Assignees:</strong> {currentTask.assignees.join(', ')}</p>
                         <p><strong>Deadline:</strong> {currentTask.deadline}</p>
-                        {currentTask.attachment && (
-                            <p><strong>Attachment:</strong> <a href={currentTask.attachment} download>Download Attachment</a></p>
+                        {currentTask.attachment && currentTask.attachment.length > 0 && (
+                            <p><strong>Attachments:</strong>
+                                <ul>
+                                    {currentTask.attachment.map((file, index) => (
+                                        <li key={index}>
+                                            <a href={file} download>{file}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </p>
                         )}
                     </div>
                 )}
