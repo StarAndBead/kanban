@@ -154,55 +154,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
         }
     };
 
-    // const handleEditOk = async (id) => {
-    //     try {
-    //         const values = await form.validateFields();
-    //         const { name, details, status, attachment, deadline, assignees } = values;
 
-    //         console.log(attachment);
-    //         console.log(attachment.fileList);
-    //         const attachmentPaths = [];
-
-    //         // 遍历 attachment.fileList 并上传每一个文件
-    //         if (attachment && attachment.fileList && attachment.fileList.length > 0) {
-    //             const username = localStorage.getItem('username');
-    //             for (const file of attachment.fileList) {
-    //                 const formData = new FormData();
-    //                 formData.append('file', file.originFileObj);
-
-    //                 const uploadResponse = await axios.post(`/api/${username}/projects/${currentEvent.id}/tasks/${id}/upload`, formData, {
-    //                     headers: {
-    //                         'Content-Type': 'multipart/form-data',
-    //                         Authorization: `Bearer ${localStorage.getItem('token')}`
-    //                     }
-    //                 });
-    //                 attachmentPaths.push(uploadResponse.data.url);
-    //             }
-    //         }
-
-    //         const updatedTask = {
-    //             name,
-    //             details,
-    //             status,
-    //             attachment: attachmentPaths, // 使用上传后的文件路径数组
-    //             deadline: deadline ? dayjs(deadline).format('YYYY-MM-DD') : null,
-    //             assignees
-    //         };
-
-    //         const username = localStorage.getItem('username');
-    //         await axios.put(`/api/${username}/projects/${currentEvent.id}/tasks/${id}`, updatedTask, {
-    //             headers: {
-    //                 Authorization: `Bearer ${localStorage.getItem('token')}`
-    //             }
-    //         });
-
-    //         setIsModalVisible(false);
-    //         fetchEvents();
-    //     } catch (error) {
-    //         console.error('Failed to edit task!', error);
-    //         message.error('Failed to edit task!');
-    //     }
-    // };
     const normFile = (e) => {
         if (Array.isArray(e)) {
             return e;
@@ -340,7 +292,27 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
             message.error('Failed to add comment!');
         }
     };
-
+    const handleFileClick = (currentEvent, currentTask, file) => {
+        const username = localStorage.getItem('username');
+        const fileName = file.substring(file.lastIndexOf('/') + 1);
+        const url = `./api/${username}/projects/${currentEvent.id}/tasks/${currentTask.id}/attachments/${fileName}`;
+        console.log("you are here");
+        axios.get(url, {
+            responseType: 'blob',
+        })
+            .then((response) => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', file);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            })
+            .catch((error) => {
+                console.error('There was an error downloading the file!', error);
+            });
+    };
     return (
         <div style={styles.column}>
             <h2>{tag}</h2>
@@ -434,13 +406,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                             </Upload>
                         </Form.Item>
                     )}
-                    {/* {isEditing && (
-                        <Form.Item name="attachment" label="Attachment">
-                            <Upload name="file" listType="text" beforeUpload={() => false} allowClear>
-                                <Button icon={<UploadOutlined />}>Click to upload</Button>
-                            </Upload>
-                        </Form.Item>
-                    )} */}
+
                     <Form.Item
                         name="assignees"
                         label="Assignees"
@@ -486,7 +452,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                 onOk={handleCancel}
                 onCancel={handleCancel}
             >
-                {currentTask && (
+                {currentEvent && currentTask && (
                     <div>
                         <p><strong>ID:</strong> {currentTask.id}</p>
                         <p><strong>Name:</strong> {currentTask.name}</p>
@@ -499,7 +465,7 @@ export const Column = ({ tag, currentEvent, events, setEvents, fetchEvents, fetc
                                 <ul>
                                     {currentTask.attachment.map((file, index) => (
                                         <li key={index}>
-                                            <a href={file} download>{file}</a>
+                                            <a href="#" onClick={() => handleFileClick(currentEvent, currentTask, file)}>{file}</a>
                                         </li>
                                     ))}
                                 </ul>
