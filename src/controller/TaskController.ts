@@ -2,11 +2,16 @@ import { Controller, Post, Put, Del, Param, Body, Inject, Provide, Files, Get } 
 import { TaskService } from '../service/TaskService';
 import { join } from 'path';
 import { promises as fs } from 'fs';
+import { Context } from '@midwayjs/koa';
+
 @Provide()
 @Controller('/api/:username/projects/:projectId/tasks')
 export class TaskController {
     @Inject()
     taskService: TaskService;
+
+    @Inject()
+    ctx: Context;
 
     @Post('/:status')
     async createTask(@Param() params, @Body() body) {
@@ -39,6 +44,7 @@ export class TaskController {
     async uploadAttachment(@Param() params, @Files() files) {
         const { taskId } = params;
         const file = files[0];
+        console.log(files);
         const targetPath = join(__dirname, '../../uploads', taskId, file.filename);
 
         try {
@@ -53,9 +59,34 @@ export class TaskController {
             throw new Error('Failed to upload file');
         }
     }
-    @Get('/:taskId/attachments')
-    async getAttachments(@Param('taskId') taskId: string) {
-        return this.taskService.getAttachments(taskId);
-    }
 
+    @Get('/:taskId/attachments/:fileName')
+    async downloadAttachment(
+        @Param('username') username: string,
+        @Param('projectId') projectId: string,
+        @Param('taskId') taskId: string,
+        @Param('fileName') fileName: string
+    ) {
+        const filePath = join(__dirname, '../../uploads', taskId, fileName);
+
+        try {
+            const fileExists = await fs.access(filePath).then(() => true).catch(() => false);
+
+            if (!fileExists) {
+                this.ctx.status = 404;
+                this.ctx.body = 'File not found';
+                return;
+            }
+
+            const encodedFileName = encodeURIComponent(fileName);
+
+            this.ctx.set('Content-Disposition', `attachment; filename="${encodedFileName}"`);
+            this.ctx.type = fileName.split('.').pop(); // Set the content type based on file extension
+            this.ctx.body = await fs.readFile(filePath);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            this.ctx.status = 500;
+            this.ctx.body = 'Failed to download file';
+        }
+    }
 }

@@ -250,6 +250,7 @@ export class TaskService {
         const taskUploadDir = join(__dirname, '../../uploads', taskId);
         try {
             const files = await fs.readdir(taskUploadDir);
+            console.log(files);
             return files.map((file) => ({
                 filename: file,
                 url: `/uploads/${taskId}/${file}`,
