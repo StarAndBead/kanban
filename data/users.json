@@ -5,81 +5,9 @@
     "password": "11111111",
     "projects": [
       {
-        "id": 1722694343002,
-        "title": "default project",
+        "id": 1722736515677,
+        "title": "22",
         "username": "111",
-        "participants": [
-          "222"
-        ],
-        "participantsId": [
-          1722533964391
-        ],
-        "To do": [],
-        "In progress": [
-          {
-            "id": 1722694470937,
-            "name": "1",
-            "details": "111111",
-            "status": "In progress",
-            "attachment": [],
-            "deadline": "2024-07-29",
-            "assignees": [
-              "111(creator of the project)"
-            ],
-            "projectId": "1722694343002",
-            "comments": []
-          }
-        ],
-        "Completed": [],
-        "favorite": false
-      }
-    ]
-  },
-  {
-    "id": 1722533964391,
-    "username": "222",
-    "password": "22222222",
-    "projects": [
-      {
-        "id": 1722694343002,
-        "title": "default project",
-        "username": "111",
-        "participants": [
-          "222"
-        ],
-        "participantsId": [
-          1722533964391
-        ],
-        "To do": [],
-        "In progress": [
-          {
-            "id": 1722694470937,
-            "name": "1",
-            "details": "111111",
-            "status": "In progress",
-            "attachment": [],
-            "deadline": "2024-07-29",
-            "assignees": [
-              "111(creator of the project)"
-            ],
-            "projectId": "1722694343002",
-            "comments": []
-          }
-        ],
-        "Completed": [],
-        "favorite": false
-      }
-    ]
-  },
-  {
-    "id": 1722694707962,
-    "username": "333",
-    "password": "33333333",
-    "projects": [
-      {
-        "id": 1722694806029,
-        "title": "default project",
-        "username": "333",
         "participants": [],
         "participantsId": [],
         "To do": [],
@@ -89,33 +17,76 @@
     ]
   },
   {
+    "id": 1722533964391,
+    "username": "222",
+    "password": "22222222",
+    "projects": []
+  },
+  {
+    "id": 1722694707962,
+    "username": "333",
+    "password": "33333333",
+    "projects": []
+  },
+  {
     "id": 1722694821842,
     "username": "444",
     "password": "44444444",
     "projects": [
       {
-        "id": 1722694823994,
-        "title": "default project",
+        "id": 1722704392589,
+        "title": "1",
         "username": "444",
-        "participants": [],
-        "participantsId": [],
-        "To do": [],
+        "participants": [
+          "111"
+        ],
+        "participantsId": [
+          1722440225078
+        ],
+        "To do": [
+          {
+            "id": 1722704414956,
+            "name": "1",
+            "details": "111144444",
+            "status": "To do",
+            "attachment": [
+              "/uploads/1722704414956/git教程.doc",
+              "/uploads/1722704414956/CLRS笔记.docx",
+              "/uploads/1722704414956/CLRS笔记.docx",
+              "/uploads/1722704414956/ppo.doc"
+            ],
+            "deadline": "2024-08-13",
+            "assignees": [
+              "444(creator of the project)",
+              "111"
+            ],
+            "projectId": "1722704392589",
+            "comments": [
+              "444:24",
+              "444:44",
+              "444:1"
+            ]
+          }
+        ],
         "In progress": [
           {
-            "id": 1722698649305,
-            "name": "1",
-            "details": "111111",
+            "id": 1722732622231,
+            "name": "2",
+            "details": "2222222",
             "status": "In progress",
-            "attachment": [],
-            "deadline": "2024-08-12",
+            "attachment": [
+              "/uploads/1722732622231/Pose2Mesh.ppt"
+            ],
+            "deadline": "2024-08-11",
             "assignees": [
               "444(creator of the project)"
             ],
-            "projectId": "1722694823994",
+            "projectId": "1722704392589",
             "comments": []
           }
         ],
-        "Completed": []
+        "Completed": [],
+        "favorite": false
       }
     ]
   }

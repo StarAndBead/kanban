@@ -13,6 +13,12 @@ export class ProjectController {
         return this.projectService.getProjects(username);
     }
 
+    @Get('/favou')
+    async getFavProjects(@Param() params) {
+        const { username } = params;
+        return this.projectService.getFavProjects(username);
+    }
+
     @Post('/:projectId/members')
     async addMember(@Param() params, @Body() body) {
         const { username, projectId } = params;

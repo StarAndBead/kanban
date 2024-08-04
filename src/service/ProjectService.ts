@@ -18,6 +18,15 @@ export class ProjectService {
         return user.projects;
     }
 
+    async getFavProjects(username: string) {
+        const users = await this.readUsers();
+        const user = users.find(u => u.username == username);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user.projects.filter(pro => pro.favorite == true);
+    }
+
     async createProject(username: string, title: string) {
         const users = await this.readUsers();
         const user = users.find(u => u.username == username);
@@ -47,6 +56,21 @@ export class ProjectService {
             throw new Error('User not found');
         }
         //  console.log({ projectId });
+        const project = user.projects.find(p => p.id == projectId);
+        if (project.username == username) {
+            const participantsUsernames = project.participants; // 获取项目参与者用户名列表
+            const participants = users.filter(u => participantsUsernames.includes(u.username)); // 查找所有参与者用户
+            //对participants中的每一个进行.projects.filter(p => p.id != projectId);
+            participants.forEach(participant => {
+                participant.projects = participant.projects.filter(p => p.id != projectId);
+            });
+        }
+        else {
+            const participantsUsernames = project.participants.filter(participant => participant != username);
+            // 更新项目的参与者用户名列表
+            project.participants = participantsUsernames;
+        }
+
         user.projects = user.projects.filter(p => p.id != projectId);
         //  console.log({ user });
         //  console.log("______________//////////");
@@ -111,6 +135,8 @@ export class ProjectService {
         await this.writeUsers(users);
         return project;
     }
+
+
 
     private async readUsers(): Promise<User[]> {
         const data = await fs.readFile(USERS_FILE, 'utf-8');

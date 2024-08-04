@@ -45,7 +45,7 @@ export class TaskService {
         return task;
     }
 
-    async updateTask(username: string, projectId: number, taskId: number, name: string, targetstatus: string, taskData: any) {
+    async updateTask(username: string, projectId: number, taskId: number, name: string, targetstatus: string, attachment: any[], taskData: any) {
         const users = await this.readUsers();
         const user = users.find(u => u.username == username);
         if (!user) {
@@ -61,7 +61,10 @@ export class TaskService {
             // 将task的comments和 projectId保留, 并将除了comments和 projectId的部分改为taskData
             const { comments, projectId, id } = task;
             Object.assign(task, taskData, { comments, projectId, id });
-
+            //  task.attachment中加入attachment的所有元素
+            if (attachment && attachment.length > 0) {
+                task.attachment = [...(task.attachment || []), ...attachment];
+            }
             const allMembers = [...project.participants, user.username];
             allMembers.forEach(memberUsername => {
                 if (memberUsername != username) {
@@ -95,6 +98,9 @@ export class TaskService {
                     project[status] = project[status].filter(t => t.id != taskId);
                     // 创建新的任务，保留comments和projectId
                     const newTask = { ...taskData, comments, projectId, id };
+                    if (attachment && attachment.length > 0) {
+                        newTask.attachment = [...(originalTask.attachment || []), ...attachment];
+                    }
                     project[targetstatus].push(newTask);
 
                     const allMembers = [...project.participants, user.username];
@@ -186,6 +192,7 @@ export class TaskService {
         await this.writeUsers(users);
         return task;
     }
+
     async uploadFiles(username: string, projectId: number, taskId: number, files: any) {
         const uploadDir = join(__dirname, '../../uploads', taskId.toString());
         const users = await this.readUsers();
@@ -237,6 +244,20 @@ export class TaskService {
         }
         await this.writeUsers(users);
         return originalTask.attachment;
+    }
+
+    async getAttachments(taskId: string) {
+        const taskUploadDir = join(__dirname, '../../uploads', taskId);
+        try {
+            const files = await fs.readdir(taskUploadDir);
+            return files.map((file) => ({
+                filename: file,
+                url: `/uploads/${taskId}/${file}`,
+            }));
+        } catch (error) {
+            console.error('Error reading attachments:', error);
+            throw new Error('Failed to get attachments');
+        }
     }
     private async readUsers(): Promise<User[]> {
         const data = await fs.readFile(USERS_FILE, 'utf-8');

@@ -19,5 +19,9 @@ export default {
   },
   cors: {
     origin: "*"
-  }
+  },
+  static: {
+    prefix: '/uploads', // URL 前缀
+    dir: join(__dirname, '../../uploads'), // 静态文件目录
+  },
 } as MidwayConfig;
